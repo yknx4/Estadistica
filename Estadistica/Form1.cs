@@ -19,9 +19,9 @@ namespace Estadistica
             Moda = new List<double>();
         }
 
-        
 
-        
+
+
         void llenarTabla()
         {
             /*Limpieza de la tabla*/
@@ -32,18 +32,18 @@ namespace Estadistica
             int intervaloClase = (int)datos.First();
             int frecuenciaAcumulada = 0;
             int numeroClaseRedondeado = numeroClaseRedondead();
-            for (int i = 0; i < numeroClaseRedondeado;i++ )
+            for (int i = 0; i < numeroClaseRedondeado; i++)
             {
-                
+
                 /*Marcas de Clase*/
                 dtgrTabla[0, i].Value = (i + 1).ToString();
                 /*Intervalos de Clase*/
                 int intervaloInicial = intervaloClase;
                 intervaloClase += (int)Math.Round(intClase, MidpointRounding.AwayFromZero);
-                dtgrTabla[1,i].Value = intervaloInicial.ToString() + " - " + intervaloClase.ToString();
-                
+                dtgrTabla[1, i].Value = intervaloInicial.ToString() + " - " + intervaloClase.ToString();
+
                 /*Frecuencia*/
-                int frecuencia=0;
+                int frecuencia = 0;
                 foreach (double dato in datos)
                 {
                     if (dato > intervaloClase) break;
@@ -58,14 +58,14 @@ namespace Estadistica
                 /*Frecuencia Relativa*/
                 double frecuenciaRelativa = (double)frecuencia / (double)cantidadDatos();
                 //MessageBox.Show(frecuencia.ToString() +" "+cantidadDatos().ToString());
-                dtgrTabla[4, i].Value = Math.Round(frecuenciaRelativa,3).ToString();
+                dtgrTabla[4, i].Value = Math.Round(frecuenciaRelativa, 3).ToString();
 
                 /*frecuenciaRelativaAcumulada*/
                 double frecuenciaRelativaAcumulada = (double)frecuenciaAcumulada / (double)cantidadDatos();
                 dtgrTabla[5, i].Value = Math.Round(frecuenciaRelativaAcumulada, 3).ToString();
 
                 /*Marca de Clase*/
-                double marcaDeClase = ((double)(intervaloClase + intervaloInicial))/2;
+                double marcaDeClase = ((double)(intervaloClase + intervaloInicial)) / 2;
                 dtgrTabla[6, i].Value = Math.Round(marcaDeClase, 3).ToString();
 
                 /*Grados*/
@@ -84,29 +84,77 @@ namespace Estadistica
                 suma += value;
             }
             promedio = suma / cantidadDatos();
-            lblPromedio.Text = Math.Round(promedio,3).ToString();
+            lblPromedio.Text = Math.Round(promedio, 3).ToString();
         }
         void calcularNumeroDeClase()
         {
             int cantidadDeDatos = cantidadDatos();
-            if (cantidadDeDatos<50)
+            if (cantidadDeDatos < 50)
             {
-                numeroClase = 1 + 3.3*Math.Log10(cantidadDeDatos);
-            } 
+                numeroClase = 1 + 3.3 * Math.Log10(cantidadDeDatos);
+            }
             else
             {
                 numeroClase = 3 + 3.3 * Math.Log10(cantidadDeDatos);
             }
             lblNoClase.Text = Math.Round(numeroClase, 3).ToString() + " ~ " + Math.Round(numeroClase, MidpointRounding.AwayFromZero).ToString();
         }
+
+        /// <summary>
+        /// Calculars the moda.
+        /// </summary>
         void calcularModa()
         {
-            lblModa.Text = "Aqui iría la moda... si tuviera una";
+            if (datos.First() == datos.Last())
+            {
+                lblModa.Text = datos.First().ToString();
+                return;
+            }
+            Moda.Clear();
+            lblModa.Text = "";
+            double valorActual = datos.First();
+            //MessageBox.Show(valorActual.ToString());
+            int countValorActual = 0;
+            int countValorMasFrecuente = 0;
+            for (int j = 0; j <= datos.Count;j++ )
+            {
+                double valor = 0;
+                bool last = j == datos.Count;
+                if(!last) valor = datos[j];
+                if (valor == valorActual && !last)
+                {
+                    countValorActual++;
+                } 
+                else
+                {
+                    if (countValorActual == countValorMasFrecuente)
+                    {
+                        Moda.Add(valorActual);
+                    } 
+                    else if(countValorActual>countValorMasFrecuente)
+                    {
+                        countValorMasFrecuente = countValorActual;
+                        Moda.Clear();
+                        Moda.Add(valorActual);
+                    }
+                    if (!last)valorActual = valor;
+                    countValorActual = 1;
+                }
+            }
+
+
+
+            foreach (double valor in Moda)
+            {
+                lblModa.Text += valor.ToString() + " ";
+            }
+
         }
         void calcularVarianza()
         {
             double temporal = 0;
-            foreach(double dato in datos){
+            foreach (double dato in datos)
+            {
                 temporal += Math.Pow(dato - promedio, 2);
             }
             varianza = temporal / (cantidadDatos() - 1);
@@ -125,24 +173,25 @@ namespace Estadistica
         void calcularMediana()
         {
             int numeroDeDatos = cantidadDatos();
-            if (numeroDeDatos==1)
+            if (numeroDeDatos == 1)
             {
                 Mediana = datos.First();
                 lblMediana.Text = Mediana.ToString();
                 return;
             }
-            if (numeroDeDatos%2 == 0)
+            if (numeroDeDatos % 2 == 0)
             {
-                Mediana = (datos[(numeroDeDatos / 2)-1] + datos[(numeroDeDatos / 2)])/2;
+                Mediana = (datos[(numeroDeDatos / 2) - 1] + datos[(numeroDeDatos / 2)]) / 2;
             }
-            else{
+            else
+            {
                 Mediana = datos[((numeroDeDatos - 1) / 2)];
             }
             lblMediana.Text = Mediana.ToString();
         }
         int cantidadDatos()
         {
-            return dtgrDatos.RowCount-1;
+            return dtgrDatos.RowCount - 1;
         }
 
         void refreshData()
@@ -169,7 +218,7 @@ namespace Estadistica
         private void validarDato(object sender, DataGridViewCellValidatingEventArgs e)
         {
             dtgrDatos.Rows[e.RowIndex].ErrorText = "";
-            
+
             double newInteger;
 
             // Don't try to validate the 'new row' until finished 
@@ -177,7 +226,7 @@ namespace Estadistica
             // is not any point in validating its initial value.
             if (dtgrDatos.Rows[e.RowIndex].IsNewRow) { return; }
             if (!double.TryParse(e.FormattedValue.ToString(),
-                out newInteger) )
+                out newInteger))
             {
                 e.Cancel = true;
                 dtgrDatos.Rows[e.RowIndex].ErrorText = "the value must be a number";
@@ -194,8 +243,8 @@ namespace Estadistica
             calcularNumeroDeClase();
             calcularIntervaloDeClase();
             calcularMediana();
-            calcularModa();
             calcularVarianza();
+            calcularModa();
             llenarTabla();
         }
 
@@ -205,7 +254,7 @@ namespace Estadistica
         }
         private void cuandoDatosCambian(object sender, DataGridViewRowsAddedEventArgs e)
         {
-           // rehacer();
+            // rehacer();
         }
 
         private void cuandoDatosCambian(object sender, DataGridViewRowsRemovedEventArgs e)
@@ -222,7 +271,7 @@ namespace Estadistica
         {
             foreach (DataGridViewRow dr in dtgrDatos.SelectedRows)
             {
-                if(!dr.IsNewRow)dtgrDatos.Rows.Remove(dr);
+                if (!dr.IsNewRow) dtgrDatos.Rows.Remove(dr);
             }
         }
     }
